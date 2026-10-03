@@ -17,7 +17,7 @@
 - No dependencies, no `package.json`, no lockfile, no build step, no minified code.
 - Every non-image file under 256 KiB.
 - The plugin makes no network requests, uses no `$.store`, no `userConfig`.
-- Only git commands run: `git --no-optional-locks status --porcelain=v2 --branch`, `git rev-parse --absolute-git-dir`, and `git --version` (only after a failed run).
+- Only git commands run: `git -c core.fsmonitor=false --no-optional-locks status --porcelain=v2 --branch`, `git -c core.fsmonitor=false rev-parse --absolute-git-dir`, and `git --version` (only after a failed run).
 - `--no-optional-locks` on every `git status` call.
 - Hooks-module rules from the mods validator: write every mods API call in full (`$.ui.toast(...)`), never assign or destructure `$` or a namespace, event names in `on()` are string literals, `$` may only be passed to functions declared at the top level of `register.js`, imports are top-level `import` declarations of relative paths.
 - No hook may throw. Every hook gets a `.catch(($, e, next) => next(e))`; inside `.catch`, `next` is replay-safe (a tool already run is not run again). (Corrected after final review; the first draft wrongly left `tool.call` without one.)
@@ -26,7 +26,6 @@
 - Commit messages end with:
   ```
   Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-  Claude-Session: <session-link>
   ```
 - Work on branch `feat/v0.1`; open one PR into `main` at the end.
 
@@ -220,8 +219,7 @@ Expected: `✔ Validation passed`; `1 pass`, `0 fail`.
 git add .claude-plugin/plugin.json hooks/hooks.json hooks/register.js test/scaffold.test.ts .gitignore LICENSE
 git commit -m "Scaffold repo-pulse plugin
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: <session-link>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 ---
@@ -382,8 +380,7 @@ If any key differs, fix the script, not the fixture file.
 git add test/capture-fixtures.sh test/fixtures.ts
 git commit -m "Add git status fixture generator and fixtures
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: <session-link>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 ---
@@ -585,8 +582,7 @@ Expected: all `git-state.test.ts` tests pass; `scaffold.test.ts` still passes.
 git add hooks/git-state.js test/git-state.test.ts
 git commit -m "Parse porcelain v2 status into PulseState
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: <session-link>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 ---
@@ -762,8 +758,7 @@ Expected: all `band.test.ts` tests pass; earlier suites still pass.
 git add hooks/band.js test/band.test.ts
 git commit -m "Render the band row and risk badge
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: <session-link>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 ---
@@ -898,8 +893,7 @@ Expected: all `risk.test.ts` tests pass; earlier suites still pass.
 git add hooks/risk.js test/risk.test.ts
 git commit -m "Toast only when a risky git state appears
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: <session-link>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 ---
@@ -1352,8 +1346,7 @@ Expected: `✔ Validation passed`. The `hooks:` line lists `session.start`, `too
 git add hooks/register.js test/harness.ts test/refresh.test.ts
 git commit -m "Refresh git state on edits, prompts, turns and a poll
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: <session-link>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 ---
@@ -1505,8 +1498,7 @@ Expected: `✔ Validation passed`; the `hooks:` line now also lists `ui.render{c
 git add hooks/register.js test/band-render.test.ts
 git commit -m "Draw the git band above the prompt
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: <session-link>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 ---
@@ -1555,8 +1547,8 @@ Outside a git repository the band shows nothing.
 
 Repo Pulse runs these commands locally, in the session's working directory:
 
-- `git --no-optional-locks status --porcelain=v2 --branch`
-- `git rev-parse --absolute-git-dir`
+- `git -c core.fsmonitor=false --no-optional-locks status --porcelain=v2 --branch`
+- `git -c core.fsmonitor=false rev-parse --absolute-git-dir`
 - `git --version`, only when a git command fails, to tell a missing git from a slow repository
 
 It also checks whether `MERGE_HEAD`, `rebase-merge` or `rebase-apply` exist in
@@ -1637,8 +1629,7 @@ Expected: validation passes, all tests pass, README well over 40 words.
 git add README.md .github/workflows/ci.yml
 git commit -m "Add README and CI
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: <session-link>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 git push -u origin feat/v0.1
 gh pr create --base main --head feat/v0.1 --title "Repo Pulse v0.1" --body "$(cat <<'EOF'
 Repo Pulse v0.1: a band above the Claude Code prompt with branch, dirty count and ahead/behind, plus toasts when a merge, rebase, conflict or detached HEAD appears.
@@ -1649,8 +1640,6 @@ Plan: docs/superpowers/plans/2026-10-03-repo-pulse.md
 API shapes confirmed in Task 1: (fill in from Task 1 Step 3 results)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-<session-link>
 EOF
 )"
 ```
