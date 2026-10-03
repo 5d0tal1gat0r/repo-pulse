@@ -1,7 +1,7 @@
 import { mock } from 'claude-code/testing'
 import { fixtures } from './fixtures.ts'
 
-export type Scenario = string | 'not-a-repo' | 'slow' | 'missing'
+export type Scenario = string | 'not-a-repo' | 'slow' | 'missing' | 'garbage'
 export type World = {
   scenario: Scenario
   delayMs: number
@@ -10,6 +10,7 @@ export type World = {
   maxActive: number
   toasts: string[]
   logs: string[]
+  debugLogs: string[]
 }
 
 export const START = { surface: 'terminal', isInteractive: true, cwd: '/work' } as const
@@ -29,7 +30,7 @@ const ENOENT = { deny: 'spawn git ENOENT' }
 // Registers every stub register.js needs. Call before the first use of $.
 export function setup(on: any, scenario: Scenario) {
   const clock = mock.clock(on)
-  const world: World = { scenario, delayMs: 0, statusCalls: 0, active: 0, maxActive: 0, toasts: [], logs: [] }
+  const world: World = { scenario, delayMs: 0, statusCalls: 0, active: 0, maxActive: 0, toasts: [], logs: [], debugLogs: [] }
 
   on('session.cwd', () => ({ value: '/work' }))
 
@@ -46,6 +47,7 @@ export function setup(on: any, scenario: Scenario) {
       if (world.delayMs > 0) await clock.sleep(world.delayMs)
       if (world.scenario === 'slow') return { deny: 'timed out after 5000 ms' }
       if (world.scenario === 'not-a-repo') return NOT_REPO
+      if (world.scenario === 'garbage') return ok('# branch.oid 0123456789\n# branch.head main\nnonsense line\n')
       return ok(fixtures[world.scenario].status)
     } finally {
       world.active -= 1
@@ -63,7 +65,11 @@ export function setup(on: any, scenario: Scenario) {
   })
 
   on('ui.toast', ($: any, e: any) => { world.toasts.push(e.text); return { value: undefined } })
-  on('ui.log', ($: any, e: any) => { world.logs.push(e.text); return { value: undefined } })
+  on('ui.log', ($: any, e: any) => {
+    if (e.to === 'debug') world.debugLogs.push(e.text)
+    else world.logs.push(e.text)
+    return { value: undefined }
+  })
 
   on('session.start', () => ({ cwd: '/work' }))
   on('tool.call', () => ({ result: 'ran' }))

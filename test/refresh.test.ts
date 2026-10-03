@@ -133,3 +133,17 @@ test('slow git backs the poll off to 120 s and recovers', async ($, on) => {
   await settle(clock)
   expect(world.statusCalls).toBe(afterSlow + 2)   // back to 30 s
 })
+
+test('unparseable git output keeps the last state and logs once to the debug log only', async ($, on) => {
+  const { clock, world } = setup(on, 'clean')
+  await boot($, clock)
+  world.scenario = 'garbage'
+  for (let i = 0; i < 2; i++) {
+    await $.tool.call({ tool: 'Bash', command: 'ls' })
+    await clock.advance(500)
+    await settle(clock)
+  }
+  expect(world.debugLogs.length).toBe(1)
+  expect(world.logs).toEqual([])
+  expect(world.toasts).toEqual([])
+})

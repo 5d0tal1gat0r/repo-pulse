@@ -60,7 +60,7 @@ async function refresh($) {
   } catch (err) {
     if (!parseErrorLogged) {
       parseErrorLogged = true
-      $.ui.log('could not read git status: ' + (err && err.message ? err.message : String(err)))
+      $.ui.log('could not read git status: ' + (err && err.message ? err.message : String(err)), { to: 'debug' })
     }
   } finally {
     inFlight = false
@@ -131,7 +131,6 @@ export function register(on) {
     return next(e)
   }).catch(($, e, next) => next(e))
 
-  // No .catch here: a retry would run the tool twice. Only next() can throw.
   on('tool.call', { tool: ['Bash', 'Edit', 'Write', 'MultiEdit', 'NotebookEdit'] }, async ($, e, next) => {
     try {
       return await next(e)
@@ -142,7 +141,7 @@ export function register(on) {
         // Never let a refresh problem affect the tool call.
       }
     }
-  })
+  }).catch(($, e, next) => next(e)) // next is replay-safe in .catch: the tool never runs twice
 
   on('prompt.submit', async ($, e, next) => {
     scheduleRefresh($)
@@ -155,6 +154,8 @@ export function register(on) {
   }).catch(($, e, next) => next(e))
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    // A survey holds the band while it is up; step aside for it.
+    if (e.props.hasSurvey) return next(e)
     const row = prev ? render(prev, e.props.bodyColumns) : null
     if (!row) return next(e)
 

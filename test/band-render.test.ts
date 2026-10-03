@@ -80,3 +80,12 @@ test('the desktop app gets the same row', async ($, on) => {
   expect(await ui.find({ type: 'Text', text: 'main · ±3' })).toBeDefined()
   await ui.unmount()
 })
+
+test('yields the band to a survey', async ($, on) => {
+  const { clock } = setup(on, 'dirty')
+  await boot($, clock)
+  const ui = await $.ui.mount({ ...BAND, props: { ...BAND.props, hasSurvey: true } })
+  expect(await ui.find({ key: 'repo-pulse' })).toBeUndefined()
+  expect(await ui.find({ type: 'Text', text: 'other mod' })).toBeDefined()
+  await ui.unmount()
+})

@@ -46,9 +46,10 @@ sends no data anywhere, and never takes git's index lock.
 - Claude Code v2.1.287 or later (mods), tested with v2.1.287
 - `git` on your `PATH`
 
-The band draws in the Claude Code terminal and in the Code tab of the Desktop
-app. In the VS Code extension's chat panel and in `claude -p`, the mod loads
-but draws nothing.
+The band draws in the Claude Code terminal. Claude Code raises the band above
+the prompt only in the terminal, so in the Desktop app, the VS Code extension's
+chat panel and `claude -p` the mod loads but draws nothing. The band steps
+aside while Claude Code shows its feedback survey.
 
 ## Development
 
