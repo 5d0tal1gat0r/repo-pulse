@@ -20,7 +20,7 @@
 - Only git commands run: `git --no-optional-locks status --porcelain=v2 --branch`, `git rev-parse --absolute-git-dir`, and `git --version` (only after a failed run).
 - `--no-optional-locks` on every `git status` call.
 - Hooks-module rules from the mods validator: write every mods API call in full (`$.ui.toast(...)`), never assign or destructure `$` or a namespace, event names in `on()` are string literals, `$` may only be passed to functions declared at the top level of `register.js`, imports are top-level `import` declarations of relative paths.
-- No hook may throw. Hooks other than `tool.call` get a `.catch(($, e, next) => next(e))`. `tool.call` gets none, because a retry from `.catch` would run the tool a second time; its body cannot throw except from `next` itself.
+- No hook may throw. Every hook gets a `.catch(($, e, next) => next(e))`; inside `.catch`, `next` is replay-safe (a tool already run is not run again). (Corrected after final review; the first draft wrongly left `tool.call` without one.)
 - Timer callbacks never return the refresh promise (`() => { void refresh($) }`), so the mock clock never waits on git.
 - Two deliberate refinements of the spec: `session.start` schedules the first refresh (500 ms debounce) instead of running it inline, so session start never waits on git; and `risk.diff` treats a previous non-repository state like `null` (clean), so moving into a repository mid-rebase still toasts.
 - Commit messages end with:
