@@ -2,6 +2,10 @@
 
 const SEP = ' · '
 
+// Control characters and bidirectional overrides could make a branch name
+// draw as something else, so they never reach the band.
+const UNSAFE = /[\u0000-\u001F\u007F-\u009F\u200E\u200F\u202A-\u202E\u2066-\u2069]/g
+
 /**
  * @param {import('./git-state.js').PulseState} state
  * @returns {string | null}
@@ -38,7 +42,7 @@ export function render(state, columns) {
   if (!state.isRepo) return null
 
   const badge = badgeFor(state)
-  const label = state.branch ?? 'HEAD@' + (state.sha ?? '?')
+  const label = (state.branch ?? '').replace(UNSAFE, '') || 'HEAD@' + (state.sha ?? '?')
 
   const segments = []
   if (state.dirty > 0) segments.push('±' + state.dirty)

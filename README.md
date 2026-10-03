@@ -27,8 +27,8 @@ Outside a git repository the band shows nothing.
 
 Repo Pulse runs these commands locally, in the session's working directory:
 
-- `git --no-optional-locks status --porcelain=v2 --branch`
-- `git rev-parse --absolute-git-dir`
+- `git -c core.fsmonitor=false --no-optional-locks status --porcelain=v2 --branch`
+- `git -c core.fsmonitor=false rev-parse --absolute-git-dir`
 - `git --version`, only when a git command fails, to tell a missing git from a slow repository
 
 It also checks whether `MERGE_HEAD`, `rebase-merge` or `rebase-apply` exist in
@@ -39,7 +39,9 @@ when a turn ends, and every 30 seconds (every 2 minutes if `git status` takes
 longer than 5 seconds).
 
 Repo Pulse makes no network requests, never runs `git fetch`, stores no data,
-sends no data anywhere, and never takes git's index lock.
+sends no data anywhere, and never takes git's index lock. It turns off
+`core.fsmonitor` for its own git commands, so a repository's config cannot make
+those commands start another program.
 
 ## Requirements
 

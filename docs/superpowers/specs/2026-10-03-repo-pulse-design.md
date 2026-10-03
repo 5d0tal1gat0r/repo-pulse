@@ -165,8 +165,8 @@ Events:
 1. If `inFlight`, set `rerun = true` and return.
 2. Set `inFlight = true`. Read `cwd = $.session.cwd()`.
 3. Run in parallel with `timeoutMs: 5000`:
-   - `git --no-optional-locks status --porcelain=v2 --branch`
-   - `git rev-parse --absolute-git-dir` (skipped when cached for `cwd`)
+   - `git -c core.fsmonitor=false --no-optional-locks status --porcelain=v2 --branch`
+   - `git -c core.fsmonitor=false rev-parse --absolute-git-dir` (skipped when cached for `cwd`)
 4. A non-zero exit from either command means "not a repository": `next = NOT_A_REPO`.
 5. Otherwise check `MERGE_HEAD`, `rebase-merge`, `rebase-apply` under the git
    dir with `$.fs.exists`, then `next = parse(...)`.

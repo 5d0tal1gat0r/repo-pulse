@@ -69,3 +69,12 @@ test('truncateMiddle', () => {
   expect(truncateMiddle('abcdef', 1)).toBe('…')
   expect(truncateMiddle('abcdef', 0)).toBe('…')
 })
+
+test('direction overrides and control characters are stripped from the branch', () => {
+  const branch = 'main\u202Egnp.exe\u2066x\u2069\u200E\u200F\u0007\u0085'
+  expect(render({ ...BASE, branch }, 80)!.text).toBe('maingnp.exex')
+})
+
+test('a branch made only of stripped characters falls back to the sha', () => {
+  expect(render({ ...BASE, branch: '\u202E\u202D' }, 80)!.text).toBe('HEAD@abc1234')
+})
