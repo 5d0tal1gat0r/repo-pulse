@@ -1,0 +1,10 @@
+{
+  "name": "repo-pulse",
+  "version": "0.1.0",
+  "description": "Glanceable git health above the Claude Code prompt: branch, dirty files, ahead/behind, and a toast when a merge, rebase, conflict or detached HEAD appears.",
+  "author": { "name": "5d0tal1gat0r", "url": "https://github.com/5d0tal1gat0r" },
+  "homepage": "https://github.com/5d0tal1gat0r/repo-pulse",
+  "repository": "https://github.com/5d0tal1gat0r/repo-pulse",
+  "license": "MIT",
+  "keywords": ["git", "status", "band", "mod"]
+}

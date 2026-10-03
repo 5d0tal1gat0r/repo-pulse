@@ -1,0 +1,4 @@
+{
+  "description": "Repo Pulse hooks module",
+  "modules": ["./register.js"]
+}
