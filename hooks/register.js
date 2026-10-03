@@ -2,6 +2,7 @@
 // This is the only file that calls the mods API. It runs git, keeps the last
 // state, and hands the pure modules their inputs.
 import { NOT_A_REPO, parse, sameState } from './git-state.js'
+import { render } from './band.js'
 import { diff } from './risk.js'
 
 const DEBOUNCE_MS = 500
@@ -151,5 +152,20 @@ export function register(on) {
   on('turn.complete', async ($, e, next) => {
     scheduleRefresh($)
     return next(e)
+  }).catch(($, e, next) => next(e))
+
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    const row = prev ? render(prev, e.props.bodyColumns) : null
+    if (!row) return next(e)
+
+    const { Box, Text } = $.ui.resolve(e)
+    const textProps = isSlow ? { dimColor: true } : {}
+    const children = [Text({ ...textProps, wrap: 'truncate-end', children: [row.text] })]
+    if (row.badge) children.push(Text({ color: 'warning', bold: true, children: [row.badge] }))
+    const ours = Box({ key: 'repo-pulse', flexDirection: 'row', columnGap: 1, children })
+
+    // Keep what the mods after this one draw in the band.
+    const theirs = await next(e)
+    return Box({ flexDirection: 'column', children: theirs ? [ours, theirs] : [ours] })
   }).catch(($, e, next) => next(e))
 }
