@@ -11,8 +11,6 @@ const SLOW_POLL_MS = 120_000
 const GIT_TIMEOUT_MS = 5_000
 const VERSION_TIMEOUT_MS = 2_000
 // core.fsmonitor=false: a repository's own config must not make git run a program.
-const STATUS_ARGV = ['git', '-c', 'core.fsmonitor=false', '--no-optional-locks', 'status', '--porcelain=v2', '--branch']
-const GIT_DIR_ARGV = ['git', '-c', 'core.fsmonitor=false', 'rev-parse', '--absolute-git-dir']
 
 /** @type {import('./git-state.js').PulseState | null} */
 let prev = null
@@ -82,8 +80,8 @@ async function readState($) {
   let dirRun
   try {
     ;[status, dirRun] = await Promise.all([
-      $.process.run(STATUS_ARGV, opts),
-      cachedDir ? null : $.process.run(GIT_DIR_ARGV, opts),
+      $.process.run(['git', '-c', 'core.fsmonitor=false', '--no-optional-locks', 'status', '--porcelain=v2', '--branch'], opts),
+      cachedDir ? null : $.process.run(['git', '-c', 'core.fsmonitor=false', 'rev-parse', '--absolute-git-dir'], opts),
     ])
   } catch {
     return onRunRejected($, cwd)

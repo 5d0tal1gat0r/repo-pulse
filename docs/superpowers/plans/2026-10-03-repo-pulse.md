@@ -142,11 +142,13 @@ test('the module loads and passes tool calls through', async ($, on) => {
 
 - [ ] **Step 3: Confirm the API shapes this plan assumes**
 
-Fetch the published declarations into the scratchpad (not the repo) and search them:
+Load the mod once with `claude --plugin-dir .` so Claude Code writes the
+declarations for your build into `.claude-plugin/types/` (git-ignored), then
+search them:
 
 ```bash
-D=<scratch>
-curl -fsSL https://raw.githubusercontent.com/anthropics/claude-code/main/mods/types/claude-code.d.ts -o "$D/claude-code.d.ts"
+D=.claude-plugin/types/claude-code
+cp "$D/index.d.ts" "$D/claude-code.d.ts"
 head -1 "$D/claude-code.d.ts"
 grep -n -A6 "cwd(" "$D/claude-code.d.ts" | head -20
 grep -n -B2 -A14 "run(argv" "$D/claude-code.d.ts" | head -40

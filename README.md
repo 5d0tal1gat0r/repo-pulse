@@ -38,6 +38,16 @@ It refreshes after Claude runs Bash or edits a file, when you submit a prompt,
 when a turn ends, and every 30 seconds (every 2 minutes if `git status` takes
 longer than 5 seconds).
 
+Why it starts programs: git has no API inside Claude Code, so the only way to
+read branch, dirty files and ahead/behind is to run the git commands above.
+Their output is parsed in memory and drawn in the band; nothing else is done
+with it.
+
+What it sends: nothing. Repo Pulse reads the conversation only to notice when
+Claude edits a file or runs a command (to refresh the band); it never copies
+that text anywhere. The only programs it starts are the git commands listed
+above.
+
 Repo Pulse makes no network requests, never runs `git fetch`, stores no data,
 sends no data anywhere, and never takes git's index lock. It turns off
 `core.fsmonitor` for its own git commands, so a repository's config cannot make
