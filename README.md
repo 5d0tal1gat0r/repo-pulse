@@ -27,8 +27,8 @@ Outside a git repository the band shows nothing.
 
 Repo Pulse runs these commands locally, in the session's working directory:
 
-- `git -c core.fsmonitor=false --no-optional-locks status --porcelain=v2 --branch`
-- `git -c core.fsmonitor=false rev-parse --absolute-git-dir`
+- `git --no-optional-locks status --porcelain=v2 --branch`
+- `git rev-parse --absolute-git-dir`
 - `git --version`, only when a git command fails, to tell a missing git from a slow repository
 
 It also checks whether `MERGE_HEAD`, `rebase-merge` or `rebase-apply` exist in
@@ -50,13 +50,15 @@ above.
 
 Repo Pulse makes no network requests, never runs `git fetch`, stores no data,
 sends no data anywhere, and never takes git's index lock. It turns off
-`core.fsmonitor` for its own git commands, so a repository's config cannot make
-those commands start another program.
+`core.fsmonitor` for its own git commands (through the environment variables
+`GIT_CONFIG_COUNT=1`, `GIT_CONFIG_KEY_0=core.fsmonitor`,
+`GIT_CONFIG_VALUE_0=false`), so a repository's config cannot make those
+commands start another program.
 
 ## Requirements
 
 - Claude Code v2.1.287 or later (mods), tested with v2.1.287
-- `git` on your `PATH`
+- `git` 2.31 or later on your `PATH`
 
 The band draws in the Claude Code terminal. Claude Code raises the band above
 the prompt only in the terminal, so in the Desktop app, the VS Code extension's

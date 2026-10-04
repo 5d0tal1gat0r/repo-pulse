@@ -9,6 +9,10 @@ const DEBOUNCE_MS = 500
 const POLL_MS = 30_000
 const SLOW_POLL_MS = 120_000
 const GIT_TIMEOUT_MS = 5_000
+// Turns off core.fsmonitor for our own git commands, so a repository's config
+// cannot make them start another program. Passed as environment (git 2.31+)
+// rather than `-c`, so the command line stays plain fixed text.
+const SAFE_GIT_ENV = { GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.fsmonitor', GIT_CONFIG_VALUE_0: 'false' }
 const VERSION_TIMEOUT_MS = 2_000
 // core.fsmonitor=false: a repository's own config must not make git run a program.
 
@@ -73,15 +77,15 @@ async function refresh($) {
 // Resolves the new state, or null to keep the previous one (git was slow).
 async function readState($) {
   const cwd = await $.session.cwd()
-  const opts = { cwd, timeoutMs: GIT_TIMEOUT_MS }
+  const opts = { cwd, env: SAFE_GIT_ENV, timeoutMs: GIT_TIMEOUT_MS }
   const cachedDir = gitDirCache.get(cwd)
 
   let status
   let dirRun
   try {
     ;[status, dirRun] = await Promise.all([
-      $.process.run(['git', '-c', 'core.fsmonitor=false', '--no-optional-locks', 'status', '--porcelain=v2', '--branch'], opts),
-      cachedDir ? null : $.process.run(['git', '-c', 'core.fsmonitor=false', 'rev-parse', '--absolute-git-dir'], opts),
+      $.process.run(['git', '--no-optional-locks', 'status', '--porcelain=v2', '--branch'], opts),
+      cachedDir ? null : $.process.run(['git', 'rev-parse', '--absolute-git-dir'], opts),
     ])
   } catch {
     return onRunRejected($, cwd)

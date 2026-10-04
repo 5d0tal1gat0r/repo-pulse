@@ -12,6 +12,7 @@ export type World = {
   logs: string[]
   debugLogs: string[]
   argvs: string[][]
+  envs: (Record<string, string> | undefined)[]
 }
 
 export const START = { surface: 'terminal', isInteractive: true, cwd: '/work' } as const
@@ -31,13 +32,14 @@ const ENOENT = { deny: 'spawn git ENOENT' }
 // Registers every stub register.js needs. Call before the first use of $.
 export function setup(on: any, scenario: Scenario) {
   const clock = mock.clock(on)
-  const world: World = { scenario, delayMs: 0, statusCalls: 0, active: 0, maxActive: 0, toasts: [], logs: [], debugLogs: [], argvs: [] }
+  const world: World = { scenario, delayMs: 0, statusCalls: 0, active: 0, maxActive: 0, toasts: [], logs: [], debugLogs: [], argvs: [], envs: [] }
 
   on('session.cwd', () => ({ value: '/work' }))
 
   on('process.run', async ($: any, e: any) => {
     const argv: string[] = e.argv
     world.argvs.push([...argv])
+    world.envs.push(e.init?.env)
     if (argv[1] === '--version') return world.scenario === 'missing' ? ENOENT : ok('git version 2.55.0\n')
     if (world.scenario === 'missing') return ENOENT
     if (argv.includes('rev-parse')) return world.scenario === 'not-a-repo' ? NOT_REPO : ok('/work/.git\n')

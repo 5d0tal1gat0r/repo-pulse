@@ -148,10 +148,15 @@ test('unparseable git output keeps the last state and logs once to the debug log
   expect(world.toasts).toEqual([])
 })
 
-test('repository git commands disable core.fsmonitor so repo config cannot run programs', async ($, on) => {
+test('repository git commands disable core.fsmonitor through the environment, with no -c on the command line', async ($, on) => {
   const { clock, world } = setup(on, 'clean')
   await boot($, clock)
-  const repoCommands = world.argvs.filter((a) => a.includes('status') || a.includes('rev-parse'))
-  expect(repoCommands.length).toBe(2)
-  for (const argv of repoCommands) expect(argv.slice(0, 3)).toEqual(['git', '-c', 'core.fsmonitor=false'])
+  const repo = world.argvs
+    .map((argv, i) => ({ argv, env: world.envs[i] }))
+    .filter(({ argv }) => argv.includes('status') || argv.includes('rev-parse'))
+  expect(repo.length).toBe(2)
+  for (const { argv, env } of repo) {
+    expect(argv).not.toContain('-c')
+    expect(env).toEqual({ GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.fsmonitor', GIT_CONFIG_VALUE_0: 'false' })
+  }
 })
